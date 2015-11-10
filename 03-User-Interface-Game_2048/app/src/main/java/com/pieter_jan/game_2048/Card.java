@@ -71,7 +71,9 @@ public class Card extends CardView
         textView.setText(number == 0 ? null : number + "");
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, number < 999 ? 32 : (number < 9999 ? 28 : (number < 99999 ? 22 : 16)));
         textView.setTextColor(getResources().getColor(number > 4 ? R.color.number_white : R.color.number_grey));
-        setCardBackgroundColor(getResources().getColor(colors.get(number)/*, getContext().getTheme()*/));
+        Integer color = colors.get(number);
+        if (color == null) color = R.color.color_2048;
+        setCardBackgroundColor(getResources().getColor(color/*, getContext().getTheme()*/));
         //setBackground(getResources().getDrawable(R.drawable.rounded_bg));
     }
 }

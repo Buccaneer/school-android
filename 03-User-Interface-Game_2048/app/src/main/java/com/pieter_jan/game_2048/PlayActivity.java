@@ -7,6 +7,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
@@ -20,10 +21,12 @@ public class PlayActivity extends AppCompatActivity
     private Board board;
     private SharedPreferences mPrefs;
     private boolean newGame;
+    private boolean alreadyWon = false;
 
     public static String SCORE = "SCORE";
     public static String BOARD = "BOARD";
     public static String NEWGAME = "NEWGAME";
+    public static String ALREADYWON = "ALREADYWON";
 
     @Bind(R.id.container)
     LinearLayout container;
@@ -39,6 +42,7 @@ public class PlayActivity extends AppCompatActivity
         ButterKnife.bind(this);
         Intent intent = getIntent();
         newGame = intent.getBooleanExtra(NEWGAME, false);
+        alreadyWon = intent.getBooleanExtra(ALREADYWON, false);
         intent.removeExtra(NEWGAME);
         setupActionBar();
         initBoard(newGame);
@@ -52,6 +56,7 @@ public class PlayActivity extends AppCompatActivity
         SharedPreferences.Editor ed = mPrefs.edit();
         ed.putString(BOARD, board.getJSON());
         ed.putInt(SCORE, board.getScore());
+        ed.putBoolean(ALREADYWON, alreadyWon);
         ed.apply();
     }
 
@@ -62,12 +67,6 @@ public class PlayActivity extends AppCompatActivity
             actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
-    @Override
-    public boolean onSupportNavigateUp()
-    {
-        finish();
-        return true;
-    }
 
     private void initBoard(boolean startNewGame)
     {
@@ -81,49 +80,25 @@ public class PlayActivity extends AppCompatActivity
             @Override
             public void onSwipeRight()
             {
-                //Log.e("SWIPE", "RIGHT");
-                if (!board.execute(Board.Direction.RIGHT)) //TODO Add ! once testing is done
-                {
-                    endGame();
-                }
-                updateScore();
-                //board.print();
+                swipe(Board.Direction.RIGHT);
             }
 
             @Override
             public void onSwipeLeft()
             {
-                //Log.e("SWIPE", "LEFT");
-                if (!board.execute(Board.Direction.LEFT))
-                {
-                    endGame();
-                }
-                updateScore();
-                //board.print();
+                swipe(Board.Direction.LEFT);
             }
 
             @Override
-            public void onSwipeTop()
+            public void onSwipeUp()
             {
-                //Log.e("SWIPE", "UP");
-                if (!board.execute(Board.Direction.UP))
-                {
-                    endGame();
-                }
-                updateScore();
-                //board.print();
+                swipe(Board.Direction.UP);
             }
 
             @Override
-            public void onSwipeBottom()
+            public void onSwipeDown()
             {
-                //Log.e("SWIPE", "DOWN");
-                if (!board.execute(Board.Direction.DOWN))
-                {
-                    endGame();
-                }
-                updateScore();
-                //board.print();
+                swipe(Board.Direction.DOWN);
             }
         };
         board.setOnTouchListener(listener);
@@ -131,12 +106,25 @@ public class PlayActivity extends AppCompatActivity
         board.setLayoutParams(params);
     }
 
+    private void swipe(Board.Direction direction)
+    {
+        if (!board.execute(direction).canMove())
+        {
+            loseGame();
+        }
+        else if (!alreadyWon && board.wonGame())
+        {
+            winGame();
+        }
+        updateScore();
+    }
+
     private void updateScore()
     {
         scoreTextView.setText(getResources().getString(R.string.score) + " " + board.getScore());
     }
 
-    private void endGame()
+    private void loseGame()
     {
         new AlertDialog.Builder(this)
                 .setTitle(getResources().getString(R.string.game_over))
@@ -156,7 +144,32 @@ public class PlayActivity extends AppCompatActivity
                         finish();
                     }
                 })
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIcon(R.drawable.ic_dialog_alert)
+                .setCancelable(false)
+                .show();
+    }
+
+    private void winGame()
+    {
+        new AlertDialog.Builder(this)
+                .setTitle(getResources().getString(R.string.game_won))
+                .setMessage(getResources().getString(R.string.text_game_won))
+                .setPositiveButton(R.string.action_continue, new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                    }
+                })
+                .setNegativeButton(R.string.action_stop, new DialogInterface.OnClickListener()
+                {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        finish();
+                    }
+                })
+                .setIcon(R.drawable.btn_star_big_off)
                 .setCancelable(false)
                 .show();
     }
@@ -180,9 +193,30 @@ public class PlayActivity extends AppCompatActivity
                     {
                     }
                 })
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIcon(R.drawable.ic_menu_revert)
                 .setCancelable(false)
                 .show();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (keyCode == KeyEvent.KEYCODE_8)
+            swipe(Board.Direction.UP);
+        else if (keyCode == KeyEvent.KEYCODE_2)
+            swipe(Board.Direction.DOWN);
+        else if (keyCode == KeyEvent.KEYCODE_4)
+            swipe(Board.Direction.LEFT);
+        else if (keyCode == KeyEvent.KEYCODE_6)
+            swipe(Board.Direction.RIGHT);
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp()
+    {
+        finish();
+        return true;
     }
 
     @Override

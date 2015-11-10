@@ -29,11 +29,11 @@ public class SwipeListener implements View.OnTouchListener
     {
     }
 
-    public void onSwipeTop()
+    public void onSwipeUp()
     {
     }
 
-    public void onSwipeBottom()
+    public void onSwipeDown()
     {
     }
 
@@ -77,11 +77,11 @@ public class SwipeListener implements View.OnTouchListener
                 {
                     if (diffY > 0)
                     {
-                        onSwipeBottom();
+                        onSwipeDown();
                     }
                     else
                     {
-                        onSwipeTop();
+                        onSwipeUp();
                     }
                     returnValue = true;
                 }

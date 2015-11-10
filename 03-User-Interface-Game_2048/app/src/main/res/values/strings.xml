@@ -5,12 +5,15 @@
     <string name="action_newgame">New Game</string>
     <string name="action_about">About</string>
     <string name="action_exit">Exit</string>
+    <string name="action_stop">Stop</string>
     <string name="action_restart">Restart Game</string>
     <string name="reset">Reset</string>
     <string name="text_reset">Are you sure you want to reset the game? All progress will be lost - forever.</string>
     <string name="text_about">This game features a 4x4 grid of tiles with a numeric value which are powers of two.\n\nYou can swipe all the tiles in one of four directions at once. When two tiles with the same value collide, they become one tile with their combined value. With every move new tiles are spawned at random.\n\nYour goal is to keep swiping until one tile reaches 2048 or the board fills up and you can\'t move anymore - game over.</string>
-    <string name="text_game_over">"Sadly this game is over. Try again?"</string>
-    <string name="game_over">"Game over"</string>
+    <string name="text_game_over">Sadly this game is over. Try again?</string>
+    <string name="game_over">Game over</string>
+    <string name="text_game_won">Congratulations! You\'ve beaten the game.\n\nYou can keep playing if you like.</string>
+    <string name="game_won">Game won</string>
     <string name="title_about">About 2048</string>
     <string name="title_activity_play">2048 1337 3D1710N</string>
     <string name="score">Score:</string>

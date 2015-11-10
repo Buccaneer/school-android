@@ -118,7 +118,7 @@ public class Board extends GridLayout
         }
     }
 
-    private boolean canMove()
+    public boolean canMove()
     {
         for (int i = 0; i < 4; i++)
         {
@@ -139,30 +139,43 @@ public class Board extends GridLayout
         return false;
     }
 
-    public boolean execute(Direction direction)
+    public boolean wonGame()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                if (cardBoard[i][j].getNumber() == 2048)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public Board execute(Direction direction)
     {
         boolean move = false;
-        boolean invert = direction.equals(Direction.UP) || direction.equals(Direction.DOWN);
+        boolean vertical = direction.equals(Direction.UP) || direction.equals(Direction.DOWN);
         for (int line = 0; line < 4; line++)
         {
             int previous = direction.start;
             int pos = direction.start;
             for (int element = direction.start; direction.check(element, direction.end); element = direction.next(element))
             {
-                if (cardBoard[invert(line, element, invert)][invert(element, line, invert)].getNumber() != 0)
+                if (cardBoard[invertIfVertical(line, element, vertical)][invertIfVertical(element, line, vertical)].getNumber() != 0)
                 {
-                    if (previous != element && cardBoard[invert(line, element, invert)][invert(element, line, invert)].getNumber() == cardBoard[invert(line, previous, invert)][invert(previous, line, invert)].getNumber())
+                    if (previous != element && cardBoard[invertIfVertical(line, element, vertical)][invertIfVertical(element, line, vertical)].getNumber() == cardBoard[invertIfVertical(line, previous, vertical)][invertIfVertical(previous, line, vertical)].getNumber())
                     {
-                        cardBoard[invert(line, previous, invert)][invert(previous, line, invert)].setNumber(cardBoard[invert(line, previous, invert)][invert(previous, line, invert)].getNumber() * 2);
-                        cardBoard[invert(line, element, invert)][invert(element, line, invert)].setNumber(0);
-                        score += cardBoard[invert(line, previous, invert)][invert(previous, line, invert)].getNumber();
+                        cardBoard[invertIfVertical(line, previous, vertical)][invertIfVertical(previous, line, vertical)].setNumber(cardBoard[invertIfVertical(line, previous, vertical)][invertIfVertical(previous, line, vertical)].getNumber() * 2);
+                        cardBoard[invertIfVertical(line, element, vertical)][invertIfVertical(element, line, vertical)].setNumber(0);
+                        score += cardBoard[invertIfVertical(line, previous, vertical)][invertIfVertical(previous, line, vertical)].getNumber();
                         previous = pos;
                         move = true;
                     }
                     else if (pos != element)
                     {
-                        cardBoard[invert(line, pos, invert)][invert(pos, line, invert)].setNumber(cardBoard[invert(line, element, invert)][invert(element, line, invert)].getNumber());
-                        cardBoard[invert(line, element, invert)][invert(element, line, invert)].setNumber(0);
+                        cardBoard[invertIfVertical(line, pos, vertical)][invertIfVertical(pos, line, vertical)].setNumber(cardBoard[invertIfVertical(line, element, vertical)][invertIfVertical(element, line, vertical)].getNumber());
+                        cardBoard[invertIfVertical(line, element, vertical)][invertIfVertical(element, line, vertical)].setNumber(0);
                         previous = previous == pos ? previous : direction.next(previous);
                         pos = direction.next(pos);
                         move = true;
@@ -178,15 +191,13 @@ public class Board extends GridLayout
         if (move)
         {
             addRandom();
-            if (!canMove())
-                return false;
         }
-        return true;
+        return this;
     }
 
-    private int invert(int index1, int index2, boolean invert)
+    private int invertIfVertical(int index1, int index2, boolean vertical)
     {
-        return invert ? index2 : index1;
+        return vertical ? index2 : index1;
     }
 
     public void print()
