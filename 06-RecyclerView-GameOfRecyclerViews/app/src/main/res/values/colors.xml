@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="overlay" type="color">#88000000</item>
+    <item name="primary" type="color">#000000</item>
+    <item name="secondary" type="color">#000000</item>
+    <item name="accent" type="color">#550000</item>
+</resources>

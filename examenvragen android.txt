@@ -1,0 +1,14 @@
+examenvragen native apps i
+
+- Hoe werkt Android? 
+	Aanvankelijk Dalvik Virtual Machine: JIT = Just In Time compilation
+	Compileer code net voor je ze nodig heb en cache ze voor volgende keren
+	Nieuw is ART = Android Runtime = compileer eenmalig van Dalvik bytecode
+	naar systeem-afhankelijke binary. = minder cpu gebruik = beter voor batterij
+- Zie Theory Website Hello onderaan resources:
+	Full Article Android Versioning
+	ART and Dalvik
+- Activity Diagram kennen: Starting -> Running -> Paused -> Stopped -> Running etc
+- Waarom Id toekennen aan views en waarom is dat belangrijk?
+	Om naar hun te kunnen refereren in de applicatie logica
+- 

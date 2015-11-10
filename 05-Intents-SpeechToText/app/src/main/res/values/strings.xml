@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">SpeechToText</string>
+
+    <string name="hello_world">Hello master!</string>
+    <string name="action_settings">Settings</string>
+    <string name="speech_to_text">Speech to Text</string>
+    <string name="speech_prompt">Speak, and your voice shall be heard!</string>
+
+</resources>

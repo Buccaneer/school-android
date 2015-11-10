@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.pieter_jan.game_2048.PlayActivity">
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_restart"
+        android:icon="@drawable/av_replay"
+        android:onClick="reset"
+        android:title="@string/action_restart"
+        app:showAsAction="ifRoom"
+        />
+</menu>

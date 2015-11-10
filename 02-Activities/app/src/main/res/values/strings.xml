@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">ActivitiesExercise</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="inception">Inception Activity</string>
+    <string name="button_start">Start another Activity</string>
+    <string name="button_stop">Stop Activity</string>
+    <string name="on_create">onCreate() calls: </string>
+    <string name="on_start">onStart() calls: </string>
+    <string name="on_resume">onResume() calls: </string>
+    <string name="on_pause">onPause() calls: </string>
+    <string name="on_stop">onStop() calls: </string>
+    <string name="on_restart">onRestart() calls: </string>
+    <string name="on_destroy">onDestroy() calls: </string>
+    <string name="forgot_to_set_text">Oops</string>
+</resources>
