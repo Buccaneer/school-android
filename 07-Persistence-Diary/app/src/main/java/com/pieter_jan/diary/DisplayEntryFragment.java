@@ -15,8 +15,9 @@ import butterknife.ButterKnife;
  */
 public class DisplayEntryFragment extends Fragment
 {
-    public static final String ENTRY = "entry";
-    private int currentEntry = -1;
+    public static final String TITLE = "title";
+    public static final String CONTENT = "content";
+    public static final String DATE = "date";
 
     @Bind(R.id.title)
     TextView title;
@@ -45,22 +46,20 @@ public class DisplayEntryFragment extends Fragment
     public void onStart()
     {
         super.onStart();
-
         Bundle args = getArguments();
         if (args != null)
         {
-            update(args.getInt(ENTRY));
-        }
-        else if (currentEntry != -1)
-        {
-            update(currentEntry);
+            update(args.getString(TITLE), args.getString(CONTENT), args.getString(DATE));
         }
     }
 
-    private void update(int entry)
+    private void update(String t, String c, String d)
     {
-        title.setText(Mock.entries.get(entry)[0]);
-        date.setText(Mock.entries.get(entry)[1]);
-        content.setText(Mock.entries.get(entry)[2]);
+        //title.setText(Mock.entries.get(entry)[0]);
+        //date.setText(Mock.entries.get(entry)[1]);
+        //content.setText(Mock.entries.get(entry)[2]);
+        title.setText(t);
+        date.setText(d);
+        content.setText(c);
     }
 }

@@ -37,11 +37,9 @@ public class MainActivity extends AppCompatActivity implements EntryListFragment
             fragmentTransaction.add(R.id.container, entryListFragment, "entryListFragment");
             fragmentTransaction.commit();
         }
-        if (fragmentManager.getBackStackEntryCount() > 0)
+        if (fragmentManager.getBackStackEntryCount() > 1)
         {
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null)
-                actionBar.setDisplayHomeAsUpEnabled(true);
+            enableBackArrow(true);
         }
     }
 
@@ -49,9 +47,7 @@ public class MainActivity extends AppCompatActivity implements EntryListFragment
     public boolean onSupportNavigateUp()
     {
         fragmentManager.popBackStack();
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null && fragmentManager.getBackStackEntryCount() == 1)
-            actionBar.setDisplayHomeAsUpEnabled(false);
+        enableBackArrow(false);
         enableButton(true);
         return true;
     }
@@ -83,20 +79,20 @@ public class MainActivity extends AppCompatActivity implements EntryListFragment
     }
 
     @Override
-    public void onEntrySelected(int entry)
+    public void onEntrySelected(String[] entry)
     {
         DisplayEntryFragment displayEntryFragment = new DisplayEntryFragment();
         Bundle args = new Bundle();
-        args.putInt(DisplayEntryFragment.ENTRY, entry);
+        args.putString(DisplayEntryFragment.TITLE, entry[0]);
+        args.putString(DisplayEntryFragment.CONTENT, entry[1]);
+        args.putString(DisplayEntryFragment.DATE, entry[2]);
         displayEntryFragment.setArguments(args);
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.container, displayEntryFragment, "displayEntryFragment");
         transaction.addToBackStack(null);
         transaction.commit();
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        enableBackArrow(true);
         enableButton(false);
     }
 
@@ -107,9 +103,7 @@ public class MainActivity extends AppCompatActivity implements EntryListFragment
         transaction.add(R.id.container, submitEntryFragment, "submitEntryFragment");
         transaction.addToBackStack(null);
         transaction.commit();
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        enableBackArrow(true);
         enableButton(false);
     }
 
@@ -117,11 +111,20 @@ public class MainActivity extends AppCompatActivity implements EntryListFragment
     public void onEntrySubmitted()
     {
         fragmentManager.popBackStack();
+        enableBackArrow(false);
+        entryListFragment.updateUI();
     }
 
-    private void enableButton(boolean visible)
+    private void enableBackArrow(boolean enable)
+    {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(enable);
+    }
+
+    private void enableButton(boolean enable)
     {
         if (addButton == null) addButton = menu.findItem(R.id.action_add);;
-        addButton.setVisible(visible);
+        addButton.setVisible(enable);
     }
 }

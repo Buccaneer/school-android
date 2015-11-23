@@ -1,7 +1,5 @@
 package com.pieter_jan.diary;
 
-import java.util.Date;
-
 /**
  * Created by Pieter-Jan on 16/11/2015.
  */
@@ -10,7 +8,7 @@ public class DiaryEntry
     private int id;
     private String title;
     private String content;
-    private Date date;
+    private long date;
 
     public int getId()
     {
@@ -42,12 +40,12 @@ public class DiaryEntry
         this.content = content;
     }
 
-    public Date getDate()
+    public long getDate()
     {
         return date;
     }
 
-    public void setDate(Date date)
+    public void setDate(long date)
     {
         this.date = date;
     }

@@ -26,7 +26,7 @@ public class DiaryContentProvider extends ContentProvider
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         sUriMatcher.addURI(MetaData.AUTHORITY, "entry", ENTRIES);
-        sUriMatcher.addURI(MetaData.AUTHORITY, "entries/#", ENTRY_ID);
+        sUriMatcher.addURI(MetaData.AUTHORITY, "entry/#", ENTRY_ID);
 
         sNotesProjectionMap = new HashMap<>();
         sNotesProjectionMap.put(MetaData.EntryTable._ID, MetaData.EntryTable._ID);

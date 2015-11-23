@@ -19,7 +19,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
                 + MetaData.EntryTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + MetaData.EntryTable.TITLE + " TEXT,"
                 + MetaData.EntryTable.CONTENT + " TEXT,"
-                + MetaData.EntryTable.DATE + " LONG,"
+                + MetaData.EntryTable.DATE + " LONG"
                 + ");");
     }
 

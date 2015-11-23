@@ -38,7 +38,7 @@ public class MyDB
         ContentValues values = new ContentValues();
         values.put(MetaData.EntryTable.TITLE, entry.getTitle());
         values.put(MetaData.EntryTable.CONTENT, entry.getContent());
-        values.put(MetaData.EntryTable.DATE, new SimpleDateFormat("HH:mm:ss dd-MM-yyyy").format(new Date()));
+        values.put(MetaData.EntryTable.DATE, System.currentTimeMillis());
         db.insert(MetaData.EntryTable.TABLE_NAME, null, values);
     }
 
@@ -52,7 +52,7 @@ public class MyDB
             entry.setId(cursor.getInt(cursor.getColumnIndex(MetaData.EntryTable._ID)));
             entry.setTitle(cursor.getString(cursor.getColumnIndex(MetaData.EntryTable.TITLE)));
             entry.setContent(cursor.getString(cursor.getColumnIndex(MetaData.EntryTable.CONTENT)));
-            entry.setDate(new SimpleDateFormat("HH:mm:ss dd-MM-yyyy").parse(cursor.getString(cursor.getColumnIndex(MetaData.EntryTable.DATE)), new ParsePosition(0)));
+            entry.setDate(cursor.getLong(cursor.getColumnIndex(MetaData.EntryTable.DATE)));
             entries.add(entry);
             cursor.moveToNext();
         }

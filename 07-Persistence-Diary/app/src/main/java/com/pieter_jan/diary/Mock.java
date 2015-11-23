@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class Mock
 {
-    public static List<String[]> entries = new ArrayList<>();
+    /*public static List<String[]> entries = new ArrayList<>();
     static
     {
         entries.add(new String[]{ "Title1", "Date1", "Content1" });
@@ -25,5 +25,5 @@ public class Mock
         titles.add("Title3");
         titles.add("Title4");
         titles.add("Title5");
-    }
+    }*/
 }
