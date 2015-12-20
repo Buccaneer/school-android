@@ -56,7 +56,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 mListener.postSelected(mPosts.get(position));
             }
         });
-        holder.setAvatar(p.getUrl());
+        holder.setAvatar(p.getThumbnail());
         holder.setTitle(p.getTitle());
     }
 
@@ -83,7 +83,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         public void setAvatar(String imgUrl)
         {
             Glide.with(mImageView.getContext())
-                    .load(R.drawable.reddit)
+                    .load(imgUrl)
+                    .placeholder(R.drawable.reddit)
                     .into(mImageView);
         }
 

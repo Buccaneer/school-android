@@ -3,8 +3,13 @@ package com.pieter_jan.redditzor;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -54,9 +59,18 @@ public class PostDetailActivity extends AppCompatActivity
     private void showPost()
     {
         actionBar.setTitle(post.getTitle());
-        mTitleTextView.setText(post.getTitle());
-        mDescriptionTextView.setText(post.getText());
-        //mImageView.setImageDrawable(null); TODO
+        mTitleTextView.setText(hyperlink(post.getTitle(), post.getUrl()));
+        mTitleTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        if (post.getText() != null) mDescriptionTextView.setText(post.getText());
+        if (post.getImage() != null)
+            Glide.with(mImageView.getContext())
+                .load(post.getImage())
+                .into(mImageView);
+    }
+
+    private Spanned hyperlink(String text, String url)
+    {
+        return Html.fromHtml("<a href='" + url + "'>" + text + "</a>");
     }
 
     @Override

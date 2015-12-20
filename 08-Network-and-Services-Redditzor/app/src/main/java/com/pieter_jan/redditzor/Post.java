@@ -12,13 +12,15 @@ public class Post implements Parcelable
     private String text;
     private String url;
     private String thumbnail;
+    private String image;
 
-    public Post(String title, String text, String url, String thumbnail)
+    public Post(String title, String text, String url, String thumbnail, String image)
     {
         setTitle(title);
         setText(text);
         setUrl(url);
         setThumbnail(thumbnail);
+        setImage(image);
     }
 
     public String getTitle()
@@ -61,9 +63,19 @@ public class Post implements Parcelable
         this.thumbnail = thumbnail;
     }
 
+    public String getImage()
+    {
+        return image;
+    }
+
+    public void setImage(String image)
+    {
+        this.image = image;
+    }
+
     public static final Parcelable.Creator<Post> CREATOR = new Parcelable.Creator<Post>() {
         public Post createFromParcel(Parcel in) {
-            return new Post(in.readString(), in.readString(), in.readString(), in.readString());
+            return new Post(in.readString(), in.readString(), in.readString(), in.readString(), in.readString());
         }
 
         public Post[] newArray(int size) {
@@ -84,5 +96,6 @@ public class Post implements Parcelable
         dest.writeString(text);
         dest.writeString(url);
         dest.writeString(thumbnail);
+        dest.writeString(image);
     }
 }

@@ -1,23 +1,29 @@
 package com.pieter_jan.redditzor;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements SubRedditFragment.LoadLimiter
 {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -27,11 +33,17 @@ public class MainActivity extends AppCompatActivity
     private CharSequence mSubRedditTitle;
     private CharSequence mNavTitle;
 
+    SharedPreferences mSharedPref;
+    private int loadLimit = 25;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mSharedPref = getPreferences(Context.MODE_PRIVATE);
+        loadLimit = mSharedPref.getInt(SubRedditFragment.LOAD_LIMIT, 25);
 
         mSubRedditTitle = mNavTitle = getTitle();
         mSubReddits = getResources().getStringArray(R.array.subreddits_array);
@@ -109,10 +121,67 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId())
         {
             case R.id.action_settings:
+                postsLoadedPerRequestSeekBar();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void postsLoadedPerRequestSeekBar()
+    {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.posts_per_request, (ViewGroup) findViewById(R.id.root));
+        AlertDialog.Builder builder = new AlertDialog.Builder(this).setView(layout);
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.setCancelable(false);
+        alertDialog.show();
+        final TextView value = (TextView) layout.findViewById(R.id.value);
+        final SeekBar sb = (SeekBar) layout.findViewById(R.id.seekbar);
+        sb.setMax(75);
+        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+                value.setText("Posts per request: " + (progress + 25));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar)
+            {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar)
+            {
+            }
+        });
+        Button ok = (Button) layout.findViewById(R.id.button_ok);
+        ok.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                loadLimit = sb.getProgress() + 25;
+                SharedPreferences.Editor editor = mSharedPref.edit();
+                editor.putInt(SubRedditFragment.LOAD_LIMIT, loadLimit);
+                editor.commit();
+                alertDialog.cancel();
+            }
+        });
+        Button cancel = (Button) layout.findViewById(R.id.button_cancel);
+        cancel.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                alertDialog.cancel();
+            }
+        });
+    }
+
+    @Override
+    public int getLoadLimit()
+    {
+        return loadLimit;
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener
@@ -132,7 +201,7 @@ public class MainActivity extends AppCompatActivity
         // Create a new fragment and specify the planet to show based on position
         Fragment fragment = new SubRedditFragment();
         Bundle args = new Bundle();
-        args.putInt(SubRedditFragment.ARG_SUBREDDIT_NUMBER, position);
+        args.putInt(SubRedditFragment.SUBREDDIT_NUMBER, position);
         fragment.setArguments(args);
 
         // Insert the fragment by replacing any existing fragment
