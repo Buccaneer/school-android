@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.pieter_jan.redditzor.model.Post;
 
 import java.util.List;
 
@@ -85,6 +86,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             Glide.with(mImageView.getContext())
                     .load(imgUrl)
                     .placeholder(R.drawable.reddit)
+                    //.load(R.drawable.reddit)
                     .into(mImageView);
         }
 

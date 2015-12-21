@@ -1,4 +1,4 @@
-package com.pieter_jan.redditzor;
+package com.pieter_jan.redditzor.legacy;
 
 import android.os.Parcel;
 import android.os.Parcelable;

@@ -3,6 +3,7 @@ package com.pieter_jan.redditzor;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.Fragment;
@@ -23,7 +24,14 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements SubRedditFragment.LoadLimiter
+import com.pieter_jan.redditzor.model.DaoMaster;
+import com.pieter_jan.redditzor.model.DaoSession;
+import com.pieter_jan.redditzor.model.Listing;
+import com.pieter_jan.redditzor.model.ListingDao;
+import com.pieter_jan.redditzor.model.Post;
+import com.pieter_jan.redditzor.model.PostDao;
+
+public class MainActivity extends AppCompatActivity implements SubRedditFragment.Coordinator
 {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -33,8 +41,17 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
     private CharSequence mSubRedditTitle;
     private CharSequence mNavTitle;
 
-    SharedPreferences mSharedPref;
+    private boolean showMenuItems = true;
+
+    private SharedPreferences mSharedPref;
     private int loadLimit = 25;
+    private int subreddit;
+
+    private SQLiteDatabase db;
+    private ListingDao listingDao;
+    private PostDao postDao;
+
+    private SubRedditFragment subredditFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -42,9 +59,31 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initDb();
+        initPreferences();
+        initDrawer(savedInstanceState);
+        initFragment();
+    }
+
+    private void initDb()
+    {
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "reddit-db", null);
+        db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        DaoSession daoSession = daoMaster.newSession();
+        listingDao = daoSession.getListingDao();
+        postDao = daoSession.getPostDao();
+    }
+
+    private void initPreferences()
+    {
         mSharedPref = getPreferences(Context.MODE_PRIVATE);
         loadLimit = mSharedPref.getInt(SubRedditFragment.LOAD_LIMIT, 25);
+        subreddit = mSharedPref.getInt(SubRedditFragment.SUBREDDIT_NUMBER, 0);
+    }
 
+    private void initDrawer(Bundle savedInstanceState)
+    {
         mSubRedditTitle = mNavTitle = getTitle();
         mSubReddits = getResources().getStringArray(R.array.subreddits_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -89,6 +128,25 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
         }
     }
 
+    private void initFragment()
+    {
+        subredditFragment = new SubRedditFragment();
+        Bundle args = new Bundle();
+        args.putInt(SubRedditFragment.SUBREDDIT_NUMBER, subreddit);
+        subredditFragment.setArguments(args);
+
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .add(R.id.content, subredditFragment)
+                .commit();
+
+        // Highlight the selected item, update the title, and close the drawer
+        mDrawerList.setItemChecked(subreddit, true);
+        setTitle(mSubReddits[subreddit]);
+        mDrawerLayout.closeDrawer(mDrawerList);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -102,9 +160,9 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
-        // If the nav drawer is open, hide action items related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-        menu.findItem(R.id.action_settings).setVisible(!drawerOpen);
+        menu.findItem(R.id.action_settings).setVisible(!drawerOpen && showMenuItems);
+        menu.findItem(R.id.action_restart).setVisible(!drawerOpen && showMenuItems);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -128,6 +186,15 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
         }
     }
 
+    public void reload(MenuItem item)
+    {
+        Listing listing = subredditFragment.getListing();
+        for (Post p : listing.getPosts())
+            postDao.delete(p);
+        listingDao.delete(listing);
+        subredditFragment.reload();
+    }
+
     private void postsLoadedPerRequestSeekBar()
     {
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -139,8 +206,10 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
         final TextView value = (TextView) layout.findViewById(R.id.value);
         final SeekBar sb = (SeekBar) layout.findViewById(R.id.seekbar);
         sb.setMax(75);
-        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+            {
                 value.setText("Posts per request: " + (progress + 25));
             }
 
@@ -178,12 +247,6 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
         });
     }
 
-    @Override
-    public int getLoadLimit()
-    {
-        return loadLimit;
-    }
-
     private class DrawerItemClickListener implements ListView.OnItemClickListener
     {
         @Override
@@ -193,27 +256,68 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
         }
     }
 
-    /**
-     * Swaps fragments in the main content view
-     */
-    private void selectItem(int position)
+    @Override
+    public int getLoadLimit()
     {
+        return loadLimit;
+    }
+
+    @Override
+    public void goToPost(Post post)
+    {
+        mDrawerToggle.setDrawerIndicatorEnabled(false);
+        showMenuItems = false;
+        invalidateOptionsMenu();
+
         // Create a new fragment and specify the planet to show based on position
-        Fragment fragment = new SubRedditFragment();
+        Fragment fragment = new PostDetailFragment();
         Bundle args = new Bundle();
-        args.putInt(SubRedditFragment.SUBREDDIT_NUMBER, position);
+        args.putParcelable(PostDetailFragment.POST, post);
         fragment.setArguments(args);
 
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.content, fragment)
+                .addToBackStack(null)
                 .commit();
+    }
 
-        // Highlight the selected item, update the title, and close the drawer
-        mDrawerList.setItemChecked(position, true);
-        setTitle(mSubReddits[position]);
-        mDrawerLayout.closeDrawer(mDrawerList);
+    private void selectItem(int position)
+    {
+        if (subredditFragment != null) {
+            subredditFragment.goToSubreddit(position);
+            setTitle(mSubReddits[position]);
+            mDrawerLayout.closeDrawers();
+        }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp()
+    {
+        goBack();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        goBack();
+    }
+
+    private void goBack()
+    {
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        showMenuItems = true;
+        invalidateOptionsMenu();
+        if (getFragmentManager().getBackStackEntryCount() > 1)
+        {
+            getFragmentManager().popBackStack();
+        }
+        else
+        {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -242,6 +346,33 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
         super.onConfigurationChanged(newConfig);
         // Pass any configuration change to the drawer toggls
         mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void persist(Listing listing)
+    {
+        for (Post p : listing.getPosts())
+        {
+            p.setListingId(listing.getId());
+            postDao.insertOrReplace(p);
+        }
+        listingDao.insertOrReplace(listing);
+    }
+
+    @Override
+    public Listing getListing(String subreddit)
+    {
+        return listingDao.queryBuilder().where(ListingDao.Properties.Category.eq(subreddit)).unique();
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        SharedPreferences.Editor editor = mSharedPref.edit();
+        editor.putInt(SubRedditFragment.SUBREDDIT_NUMBER, subreddit);
+        editor.commit();
+        if (db != null) db.close();
     }
 
 }

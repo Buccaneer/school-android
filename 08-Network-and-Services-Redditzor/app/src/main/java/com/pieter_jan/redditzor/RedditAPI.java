@@ -1,5 +1,7 @@
 package com.pieter_jan.redditzor;
 
+import com.pieter_jan.redditzor.model.Listing;
+
 import retrofit.Call;
 import retrofit.http.GET;
 import retrofit.http.Path;

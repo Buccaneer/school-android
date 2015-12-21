@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pieter_jan.crimsonavenger" >
+    package="com.bignerdranch.android.criminalintent" >
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+                     android:maxSdkVersion="18"
+        />
+    <uses-feature android:name="android.hardware.camera"
+                  android:required="false"
+        />
 
     <application
         android:allowBackup="true"
@@ -8,13 +15,18 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:name="com.bignerdranch.criminalintent.CrimePagerActivity"
+            android:label="@string/app_name"
+            android:parentActivityName="com.bignerdranch.criminalintent.CrimeListActivity">
+        </activity>
+        <activity android:name="com.bignerdranch.criminalintent.CrimeListActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
     </application>
 

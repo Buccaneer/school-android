@@ -1,4 +1,4 @@
-package com.pieter_jan.redditzor;
+package com.pieter_jan.redditzor.legacy;
 
 import java.util.List;
 
@@ -31,5 +31,14 @@ public class Listing
     public String getAfter()
     {
         return after;
+    }
+
+    public void setAfter(String after)
+    {
+        this.after = after;
+    }
+
+    public int getCount() {
+        return posts != null ? posts.size() : 0;
     }
 }

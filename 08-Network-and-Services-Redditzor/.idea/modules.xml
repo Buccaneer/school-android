@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/08-Network-and-Services-Redditzor.iml" filepath="$PROJECT_DIR$/08-Network-and-Services-Redditzor.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/redditdaogenerator/redditdaogenerator.iml" filepath="$PROJECT_DIR$/redditdaogenerator/redditdaogenerator.iml" />
     </modules>
   </component>
 </project>

@@ -7,6 +7,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
+import com.pieter_jan.redditzor.model.Listing;
+import com.pieter_jan.redditzor.model.Post;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

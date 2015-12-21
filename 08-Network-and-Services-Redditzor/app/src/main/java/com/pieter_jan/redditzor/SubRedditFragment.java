@@ -1,21 +1,27 @@
 package com.pieter_jan.redditzor;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.pieter_jan.redditzor.model.*;
 
+import java.util.ArrayList;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import retrofit.Call;
 import retrofit.Callback;
 import retrofit.GsonConverterFactory;
@@ -30,41 +36,75 @@ public class SubRedditFragment extends Fragment implements PostAdapter.PostSelec
     public static final String SUBREDDIT_NUMBER = "subreddit_number";
     public static final String LOAD_LIMIT = "load_limit";
 
-    private RecyclerView mRecyclerView;
+    @Bind(R.id.list_spinner_container)
+    FrameLayout spinnerContainer;
+    @Bind(R.id.list_spinner)
+    ProgressBar spinner;
+    @Bind(R.id.not_found)
+    TextView notFound;
+
+    @Bind(R.id.post_list)
+    RecyclerView mRecyclerView;
     private PostAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
 
-    private List<Post> postList;
-    private Listing listing;
+    private Listing expandingListing;
     private String subreddit;
 
-    private static int current_page = 1;
-    private LoadLimiter loadLimiter;
+    private Coordinator coordinator;
 
-    public interface LoadLimiter
+    public interface Coordinator
     {
         int getLoadLimit();
+        void persist(Listing listing);
+        Listing getListing(String subreddit);
+        void goToPost(Post post);
+    }
+
+    public Listing getListing()
+    {
+        return expandingListing;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        coordinator = (Coordinator) getActivity();
+        int index = getArguments().getInt(SUBREDDIT_NUMBER);
+        initListing(index);
+    }
+
+    private void initListing(int index)
+    {
+        subreddit = getResources().getStringArray(R.array.subreddits_array)[index];
+        expandingListing = coordinator.getListing(subreddit);
+        if (expandingListing == null)
+            expandingListing = new Listing(new ArrayList<Post>(), subreddit);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        View rootView = inflater.inflate(R.layout.fragment_subreddit, container, false);
-        int i = getArguments().getInt(SUBREDDIT_NUMBER);
-        subreddit = getResources().getStringArray(R.array.subreddits_array)[i];
+        View rootView = inflater.inflate(R.layout.post_list, container, false);
+        ButterKnife.bind(this, rootView);
 
-        postList = new ArrayList<>();
-        loadLimiter = (LoadLimiter) getActivity();
-        loadData(current_page);
+        if (expandingListing.getPosts().size() == 0)
+            loadData();
 
-        mRecyclerView = ((RecyclerView) rootView.findViewById(R.id.post_list));
+        initAdapter(expandingListing, mRecyclerView);
+        return rootView;
+    }
+
+    private void initAdapter(final Listing listing, RecyclerView recyclerView)
+    {
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new PostAdapter(getActivity(), postList);
+        recyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new PostAdapter(getActivity(), listing.getPosts());
         mAdapter.setListener(this);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setOnScrollListener(new EndlessRecyclerOnScrollListener(mLayoutManager)
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.setOnScrollListener(new EndlessRecyclerOnScrollListener(mLayoutManager)
         {
             @Override
             public void onLoadMore(int current_page)
@@ -72,21 +112,20 @@ public class SubRedditFragment extends Fragment implements PostAdapter.PostSelec
                 loadMoreData(listing.getAfter());
             }
         });
-        //getActivity().setTitle(subreddit);
-
-        return rootView;
     }
 
-    private void loadData(int current_page)
+    private void loadData()
     {
-        // I have not used current page for showing demo, if u use a webservice
-        // then it is useful for every call request
+        //LEGACY FOR TESTING PURPOSES
         /*for (int i = ival; i <= loadLimit; i++)
         {
             Post p = new Post(subreddit + i, subreddit + i + "-TEXT", "https://www.google.be", "http://i.imgur.com/5plPFPU.png");
             postList.add(p);
             ival++;
         }*/
+        spinnerContainer.setVisibility(View.VISIBLE);
+        spinner.setVisibility(View.VISIBLE);
+        notFound.setVisibility(View.INVISIBLE);
 
         Gson gson = new GsonBuilder()
                 .serializeNulls()
@@ -99,14 +138,13 @@ public class SubRedditFragment extends Fragment implements PostAdapter.PostSelec
                 .build();
         RedditAPI redditAPI = retrofit.create(RedditAPI.class);
 
-        Call<Listing> call = redditAPI.loadPostsAfter(subreddit, null, Integer.toString(loadLimiter.getLoadLimit()));
+        Call<Listing> call = redditAPI.loadPostsAfter(subreddit, null, Integer.toString(coordinator.getLoadLimit()));
         call.enqueue(this);
     }
 
     private void loadMoreData(String after)
     {
-        // I have not used current page for showing demo, if u use a webservice
-        // then it is useful for every call request
+        //LEGACY FOR TESTING PURPOSES
         /*loadLimit = ival + 10;
         for (int i = ival; i <= loadLimit; i++)
         {
@@ -126,30 +164,61 @@ public class SubRedditFragment extends Fragment implements PostAdapter.PostSelec
                 .build();
         RedditAPI redditAPI = retrofit.create(RedditAPI.class);
 
-        Call<Listing> call = redditAPI.loadPostsAfter(subreddit, after, Integer.toString(loadLimiter.getLoadLimit()));
+        Call<Listing> call = redditAPI.loadPostsAfter(subreddit, after, Integer.toString(coordinator.getLoadLimit()));
         call.enqueue(this);
+    }
+
+    public void reload()
+    {
+        expandingListing = new Listing(new ArrayList<Post>(), subreddit);
+        initAdapter(expandingListing, mRecyclerView);
+        loadData();
+    }
+
+    public void goToSubreddit(int index)
+    {
+        initListing(index);
+        initAdapter(expandingListing, mRecyclerView);
+        if (expandingListing.getPosts().size() == 0)
+            loadData();
     }
 
     @Override
     public void postSelected(Post post)
     {
-        Intent intent = new Intent(getActivity(), PostDetailActivity.class);
-        intent.putExtra(PostDetailActivity.POST, post);
-        startActivity(intent);
+        coordinator.goToPost(post);
     }
 
     @Override
     public void onResponse(Response<Listing> response, Retrofit retrofit)
     {
-        listing = response.body();
-        postList.addAll(response.body().getPosts());
-        Log.e(subreddit, loadLimiter.getLoadLimit() + " posts have been loaded.");
+        Listing newListing = response.body();
+        expandingListing.getPosts().addAll(response.body().getPosts());
+        expandingListing.setAfter(newListing.getAfter());
+        coordinator.persist(expandingListing);
+        Log.e(subreddit, coordinator.getLoadLimit() + " posts have been loaded.");
         mAdapter.notifyDataSetChanged();
+        spinnerContainer.setVisibility(View.GONE);
     }
 
     @Override
     public void onFailure(Throwable t)
     {
+        spinner.setVisibility(View.INVISIBLE);
+        notFound.setVisibility(View.VISIBLE);
+        notFound.setText(R.string.not_found);
         t.printStackTrace();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                getActivity().onBackPressed();
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

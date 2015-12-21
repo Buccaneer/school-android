@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Redditzor</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="action_reload">Reload</string>
     <string-array name="subreddits_array">
         <item>ArcherFx</item>
         <item>Atheism</item>
@@ -13,4 +13,5 @@
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="posts_per_request">Posts per request: 25</string>
+    <string name="not_found">Couldn\'t connect to Reddit,\nplease check your internet connection</string>
 </resources>

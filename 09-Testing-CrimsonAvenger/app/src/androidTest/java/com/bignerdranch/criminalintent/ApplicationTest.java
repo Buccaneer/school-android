@@ -1,4 +1,4 @@
-package com.pieter_jan.crimsonavenger;
+package com.bignerdranch.criminalintent;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
