@@ -2,6 +2,7 @@ package com.pieter_jan.kappagrrm;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.StringSignature;
+import com.pieter_jan.kappagrrm.model.Character;
 
 import java.util.List;
 
@@ -17,14 +20,14 @@ import java.util.List;
  */
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder>
 {
-    Context mContext;
+    MainActivity mContext;
     List<Character> mCharacters;
     CharacterSelectedListener mListener;
 
-    public MainAdapter(Context context, List<Character> characters)
+    public MainAdapter(Context activity)
     {
-        mContext = context;
-        mCharacters = characters;
+        mContext = (MainActivity) activity;
+        mCharacters = mContext.getCharacters();
     }
 
     public interface CharacterSelectedListener
@@ -82,6 +85,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         {
             Glide.with(imageView.getContext())
                     .load(imgId)
+                    //.signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
                     .into(imageView);
         }
 
@@ -89,6 +93,32 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         {
             textView.setText(name);
         }
+    }
+
+    public ItemTouchHelper initTouchHelper()
+    {
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
+                new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT)
+                {
+                    @Override
+                    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)
+                    {
+                        return false;
+                    }
+
+                    @Override
+                    public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                        int position = viewHolder.getAdapterPosition();
+                        Character c = mCharacters.get(position);
+                        mContext.killCharacter(c);
+                        mCharacters.remove(position);
+                        notifyItemRemoved(position);
+                        Glide.clear(((MainViewHolder) viewHolder).imageView);
+                        if (mCharacters.size() == 0)
+                            mContext.everyoneDied();
+                    }
+                };
+        return new ItemTouchHelper(simpleItemTouchCallback);
     }
 
 }

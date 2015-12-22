@@ -1,4 +1,4 @@
-package com.pieter_jan.kappagrrm;
+package com.pieter_jan.kappagrrm.legacy;
 
 import android.os.Parcel;
 import android.os.Parcelable;

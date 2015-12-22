@@ -17,6 +17,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class DatePickerFragment extends DialogFragment {
 
     public static final String EXTRA_DATE =
@@ -24,7 +27,7 @@ public class DatePickerFragment extends DialogFragment {
 
     private static final String ARG_DATE = "date";
 
-    private DatePicker mDatePicker;
+    @Bind(R.id.dialog_date_date_picker) DatePicker mDatePicker;
 
     public static DatePickerFragment newInstance(Date date) {
         Bundle args = new Bundle();
@@ -48,7 +51,7 @@ public class DatePickerFragment extends DialogFragment {
         View v = LayoutInflater.from(getActivity())
                 .inflate(R.layout.dialog_date, null);
 
-        mDatePicker = (DatePicker) v.findViewById(R.id.dialog_date_date_picker);
+        ButterKnife.bind(this, v);
         mDatePicker.init(year, month, day, null);
 
         return new AlertDialog.Builder(getActivity())

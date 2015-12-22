@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/09-Testing-CrimsonAvenger.iml" filepath="$PROJECT_DIR$/09-Testing-CrimsonAvenger.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/crimedaogenerator/crimedaogenerator.iml" filepath="$PROJECT_DIR$/crimedaogenerator/crimedaogenerator.iml" />
     </modules>
   </component>
 </project>

@@ -1,12 +1,12 @@
 package com.bignerdranch.criminalintent;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,14 +17,20 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.bignerdranch.android.criminalintent.R;
+import com.bignerdranch.criminalintent.model.Crime;
 
+import java.util.Date;
 import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class CrimeListFragment extends Fragment {
 
     private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
 
-    private RecyclerView mCrimeRecyclerView;
+    @Bind(R.id.crime_recycler_view) RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
     private boolean mSubtitleVisible;
     private Callbacks mCallbacks;
@@ -43,7 +49,7 @@ public class CrimeListFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(Context activity) {
         super.onAttach(activity);
         mCallbacks = (Callbacks) activity;
     }
@@ -52,9 +58,7 @@ public class CrimeListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
-
-        mCrimeRecyclerView = (RecyclerView) view
-                .findViewById(R.id.crime_recycler_view);
+        ButterKnife.bind(this, view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         if (savedInstanceState != null) {
@@ -101,7 +105,8 @@ public class CrimeListFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_new_crime:
-                Crime crime = new Crime();
+                Crime crime = new Crime("Take that GreenDao");
+                crime.setDate(new Date());
                 CrimeLab.get(getActivity()).addCrime(crime);
                 updateUI();
                 mCallbacks.onCrimeSelected(crime);
@@ -144,29 +149,33 @@ public class CrimeListFragment extends Fragment {
         updateSubtitle();
     }
 
-    private class CrimeHolder extends RecyclerView.ViewHolder 
+    class CrimeHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
 
-        private TextView mTitleTextView;
-        private TextView mDateTextView;
-        private CheckBox mSolvedCheckBox;
+        @Bind(R.id.list_item_crime_title_text_view) TextView mTitleTextView;
+        @Bind(R.id.list_item_crime_date_text_view) TextView mDateTextView;
+        @Bind(R.id.list_item_crime_solved_check_box) CheckBox mSolvedCheckBox;
 
         private Crime mCrime;
 
         public CrimeHolder(View itemView) {
             super(itemView);
+            ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);
-
-            mTitleTextView = (TextView) itemView.findViewById(R.id.list_item_crime_title_text_view);
-            mDateTextView = (TextView) itemView.findViewById(R.id.list_item_crime_date_text_view);
-            mSolvedCheckBox = (CheckBox) itemView.findViewById(R.id.list_item_crime_solved_check_box);
         }
 
         public void bindCrime(Crime crime) {
             mCrime = crime;
             mTitleTextView.setText(mCrime.getTitle());
             mDateTextView.setText(mCrime.getDate().toString());
-            mSolvedCheckBox.setChecked(mCrime.isSolved());
+            mSolvedCheckBox.setChecked(mCrime.getSolved());
+        }
+
+        @OnClick(R.id.list_item_crime_solved_check_box)
+        public void clickSolved()
+        {
+            mCrime.setSolved(mSolvedCheckBox.isChecked());
+            CrimeLab.get(getActivity()).updateCrime(mCrime);
         }
 
         @Override
@@ -181,6 +190,31 @@ public class CrimeListFragment extends Fragment {
 
         public CrimeAdapter(List<Crime> crimes) {
             mCrimes = crimes;
+            initSwipeToDelete();
+        }
+
+        private void initSwipeToDelete()
+        {
+            ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
+                    new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT)
+                    {
+                        @Override
+                        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)
+                        {
+                            return false;
+                        }
+
+                        @Override
+                        public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                            int position = viewHolder.getAdapterPosition();
+                            Crime c = mCrimes.get(position);
+                            CrimeLab.get(getActivity()).deleteCrime(c);
+                            mCrimes.remove(position);
+                            notifyItemRemoved(position);
+                        }
+                    };
+            ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+            itemTouchHelper.attachToRecyclerView(mCrimeRecyclerView);
         }
 
         @Override

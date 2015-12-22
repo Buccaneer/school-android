@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.pieter_jan.kappagrrm.model.Character;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

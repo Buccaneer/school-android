@@ -3,7 +3,7 @@ package com.bignerdranch.criminalintent.database;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 
-import com.bignerdranch.criminalintent.Crime;
+import com.bignerdranch.criminalintent.legacy.Crime;
 
 import java.util.Date;
 import java.util.UUID;

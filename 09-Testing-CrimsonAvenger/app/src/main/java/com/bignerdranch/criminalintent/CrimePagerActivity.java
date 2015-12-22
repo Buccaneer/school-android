@@ -10,19 +10,22 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.bignerdranch.android.criminalintent.R;
+import com.bignerdranch.criminalintent.model.Crime;
 
 import java.util.List;
-import java.util.UUID;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
 public class CrimePagerActivity extends AppCompatActivity
         implements CrimeFragment.Callbacks {
     private static final String EXTRA_CRIME_ID =
             "com.bignerdranch.android.criminalintent.crime_id";
 
-    private ViewPager mViewPager;
+    @Bind(R.id.activity_crime_pager_view_pager) ViewPager mViewPager;
     private List<Crime> mCrimes;
 
-    public static Intent newIntent(Context packageContext, UUID crimeId) {
+    public static Intent newIntent(Context packageContext, Long crimeId) {
         Intent intent = new Intent(packageContext, CrimePagerActivity.class);
         intent.putExtra(EXTRA_CRIME_ID, crimeId);
         return intent;
@@ -33,10 +36,11 @@ public class CrimePagerActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crime_pager);
 
-        UUID crimeId = (UUID) getIntent()
+        Long crimeId = (Long) getIntent()
                 .getSerializableExtra(EXTRA_CRIME_ID);
 
-        mViewPager = (ViewPager) findViewById(R.id.activity_crime_pager_view_pager);
+        ButterKnife.bind(this);
+        //mViewPager = (ViewPager) findViewById(R.id.activity_crime_pager_view_pager);
 
         mCrimes = CrimeLab.get(this).getCrimes();
         FragmentManager fragmentManager = getSupportFragmentManager();
