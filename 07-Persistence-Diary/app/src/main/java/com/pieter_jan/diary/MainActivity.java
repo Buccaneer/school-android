@@ -10,8 +10,6 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements EntryListFragment.OnEntrySelectedListener, SubmitEntryFragment.OnEntrySubmittedListener
 {
-    //setBackground(getResources().getDrawable(R.drawable.border));
-
     FragmentManager fragmentManager;
     EntryListFragment entryListFragment;
 
@@ -104,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements EntryListFragment
         transaction.addToBackStack(null);
         transaction.commit();
         enableBackArrow(true);
-        enableButton(false);
+        enableButton(true);
     }
 
     @Override
@@ -112,7 +110,6 @@ public class MainActivity extends AppCompatActivity implements EntryListFragment
     {
         fragmentManager.popBackStack();
         enableBackArrow(false);
-        entryListFragment.updateUI();
     }
 
     private void enableBackArrow(boolean enable)

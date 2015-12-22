@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="colorPrimary">#607d8b</color>
+    <color name="colorPrimaryDark">#37474f</color>
+    <color name="colorAccent">#ff9800</color>
+
     <color name="number_grey">#776e65</color>
     <color name="white">#f9f6f2</color>
     <color name="overlay">#55000000</color>
