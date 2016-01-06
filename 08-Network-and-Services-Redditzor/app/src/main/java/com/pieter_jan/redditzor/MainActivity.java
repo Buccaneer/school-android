@@ -204,8 +204,10 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
         alertDialog.setCancelable(false);
         alertDialog.show();
         final TextView value = (TextView) layout.findViewById(R.id.value);
+        value.setText(getString(R.string.posts_per_request) + " " + loadLimit);
         final SeekBar sb = (SeekBar) layout.findViewById(R.id.seekbar);
         sb.setMax(75);
+        sb.setProgress(loadLimit - 25);
         sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
         {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)

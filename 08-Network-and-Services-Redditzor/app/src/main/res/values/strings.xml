@@ -12,6 +12,6 @@
     </string-array>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-    <string name="posts_per_request">Posts per request: 25</string>
+    <string name="posts_per_request">Posts per request:</string>
     <string name="not_found">Couldn\'t connect to Reddit,\nplease check your internet connection</string>
 </resources>
