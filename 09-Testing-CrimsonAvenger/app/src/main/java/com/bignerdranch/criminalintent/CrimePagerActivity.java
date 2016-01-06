@@ -40,7 +40,6 @@ public class CrimePagerActivity extends AppCompatActivity
                 .getSerializableExtra(EXTRA_CRIME_ID);
 
         ButterKnife.bind(this);
-        //mViewPager = (ViewPager) findViewById(R.id.activity_crime_pager_view_pager);
 
         mCrimes = CrimeLab.get(this).getCrimes();
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -58,27 +57,42 @@ public class CrimePagerActivity extends AppCompatActivity
             }
         });
 
-        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
+        {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
-
-            @Override
-            public void onPageSelected(int position) {
-                Crime crime = mCrimes.get(position);
-                if (crime.getTitle() != null) {
-                    setTitle(crime.getTitle());
-                }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) { }
+            public void onPageSelected(int position)
+            {
+                setTitleFromPos(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state)
+            {
+            }
         });
 
         for (int i = 0; i < mCrimes.size(); i++) {
             if (mCrimes.get(i).getId().equals(crimeId)) {
                 mViewPager.setCurrentItem(i);
+                if (i == 0)
+                {
+                    setTitleFromPos(i);
+                }
                 break;
             }
+        }
+    }
+
+    private void setTitleFromPos(int position)
+    {
+        Crime crime = mCrimes.get(position);
+        if (crime.getTitle() != null) {
+            setTitle(crime.getTitle());
         }
     }
 

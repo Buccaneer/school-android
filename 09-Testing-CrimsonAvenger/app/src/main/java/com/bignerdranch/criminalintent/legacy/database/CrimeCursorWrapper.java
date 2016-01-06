@@ -1,4 +1,4 @@
-package com.bignerdranch.criminalintent.database;
+package com.bignerdranch.criminalintent.legacy.database;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
@@ -8,7 +8,7 @@ import com.bignerdranch.criminalintent.legacy.Crime;
 import java.util.Date;
 import java.util.UUID;
 
-import com.bignerdranch.criminalintent.database.CrimeDbSchema.CrimeTable;
+import com.bignerdranch.criminalintent.legacy.database.CrimeDbSchema.CrimeTable;
 
 public class CrimeCursorWrapper extends CursorWrapper {
     public CrimeCursorWrapper(Cursor cursor) {

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 
-import com.bignerdranch.criminalintent.database.CrimeBaseHelper;
 import com.bignerdranch.criminalintent.model.Crime;
 import com.bignerdranch.criminalintent.model.CrimeDao;
 import com.bignerdranch.criminalintent.model.DaoMaster;
@@ -21,26 +20,23 @@ public class CrimeLab
     private static CrimeLab sCrimeLab;
 
     private Context mContext;
-    private SQLiteDatabase mDatabase;
     private CrimeDao crimeDao;
 
     public static CrimeLab get(Context context) {
         if (sCrimeLab == null) {
             sCrimeLab = new CrimeLab(context);
-            sCrimeLab.initDb();
         }
         return sCrimeLab;
     }
 
     private CrimeLab(Context context) {
         mContext = context.getApplicationContext();
-        mDatabase = new CrimeBaseHelper(mContext)
-                .getWritableDatabase();
+        initDb();
     }
 
     private void initDb() {
         DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(mContext, "crime-db", null);
-        mDatabase = helper.getWritableDatabase();
+        SQLiteDatabase mDatabase = helper.getWritableDatabase();
         DaoMaster daoMaster = new DaoMaster(mDatabase);
         DaoSession daoSession = daoMaster.newSession();
         crimeDao = daoSession.getCrimeDao();

@@ -1,4 +1,4 @@
-package com.bignerdranch.criminalintent.database;
+package com.bignerdranch.criminalintent.legacy.database;
 
 public class CrimeDbSchema {
     public static final class CrimeTable {

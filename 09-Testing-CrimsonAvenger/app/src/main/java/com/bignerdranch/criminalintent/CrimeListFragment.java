@@ -33,7 +33,7 @@ public class CrimeListFragment extends Fragment {
     @Bind(R.id.crime_recycler_view) RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
     private boolean mSubtitleVisible;
-    private Callbacks mCallbacks;
+    Callbacks mCallbacks;
 
     /**
      * Required interface for hosting activities.
@@ -137,7 +137,6 @@ public class CrimeListFragment extends Fragment {
     public void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
-
         if (mAdapter == null) {
             mAdapter = new CrimeAdapter(crimes);
             mCrimeRecyclerView.setAdapter(mAdapter);
@@ -145,7 +144,6 @@ public class CrimeListFragment extends Fragment {
             mAdapter.setCrimes(crimes);
             mAdapter.notifyDataSetChanged();
         }
-
         updateSubtitle();
     }
 
