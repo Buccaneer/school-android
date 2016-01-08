@@ -16,6 +16,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnPageChange;
 
 public class CrimePagerActivity extends AppCompatActivity
         implements CrimeFragment.Callbacks {
@@ -57,25 +58,6 @@ public class CrimePagerActivity extends AppCompatActivity
             }
         });
 
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
-        {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
-            {
-            }
-
-            @Override
-            public void onPageSelected(int position)
-            {
-                setTitleFromPos(position);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state)
-            {
-            }
-        });
-
         for (int i = 0; i < mCrimes.size(); i++) {
             if (mCrimes.get(i).getId().equals(crimeId)) {
                 mViewPager.setCurrentItem(i);
@@ -86,6 +68,11 @@ public class CrimePagerActivity extends AppCompatActivity
                 break;
             }
         }
+    }
+
+    @OnPageChange(R.id.activity_crime_pager_view_pager)
+    void onPageSelected(int position) {
+        setTitleFromPos(position);
     }
 
     private void setTitleFromPos(int position)
