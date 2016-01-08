@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements EntryListFragment
             fragmentTransaction.add(R.id.container, entryListFragment, "entryListFragment");
             fragmentTransaction.commit();
         }
-        if (fragmentManager.getBackStackEntryCount() > 1)
+        if (fragmentManager.getBackStackEntryCount() > 0)
         {
             enableBackArrow(true);
         }
