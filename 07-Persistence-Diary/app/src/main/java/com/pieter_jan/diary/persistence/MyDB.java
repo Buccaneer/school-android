@@ -4,13 +4,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 
 import com.pieter_jan.diary.DiaryEntry;
 
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,7 +18,6 @@ public class MyDB
 {
     private SQLiteDatabase db;
     private MyDBHelper helper;
-    private String[] allColumns = { MetaData.EntryTable._ID, MetaData.EntryTable.TITLE, MetaData.EntryTable.CONTENT, MetaData.EntryTable.DATE };
 
     public MyDB(Context context) {
         helper = new MyDBHelper(context);
@@ -34,6 +31,22 @@ public class MyDB
         helper.close();
     }
 
+    public long insert(String tableName, String entry, ContentValues values) {
+        return db.insert(tableName, entry, values);
+    }
+
+    public int update(String tableName, ContentValues values, String s, String[] selectionArgs) {
+        return db.update(tableName, values, s, selectionArgs);
+    }
+
+    public int delete(String tableName, String where, String[] whereArgs) {
+        return db.delete(tableName, where, whereArgs);
+    }
+
+    public Cursor getDiaryEntries(SQLiteQueryBuilder qb, String[] projection, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
+        return qb.query(db, projection, selection, selectionArgs, groupBy, having, orderBy);
+    }
+
     public void insertDiaryEntry(DiaryEntry entry) {
         ContentValues values = new ContentValues();
         values.put(MetaData.EntryTable.TITLE, entry.getTitle());
@@ -44,7 +57,7 @@ public class MyDB
 
     public List<DiaryEntry> getDiaryEntries() {
         List<DiaryEntry> entries = new ArrayList<>();
-        Cursor cursor = db.query(MetaData.EntryTable.TABLE_NAME, allColumns, null, null, null, null, null);
+        Cursor cursor = db.query(MetaData.EntryTable.TABLE_NAME, MetaData.EntryTable.ALL_COLUMNS, null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast())
         {

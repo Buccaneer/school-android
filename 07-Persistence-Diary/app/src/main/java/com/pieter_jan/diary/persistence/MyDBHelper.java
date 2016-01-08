@@ -15,17 +15,12 @@ public class MyDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + MetaData.EntryTable.TABLE_NAME + " ("
-                + MetaData.EntryTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + MetaData.EntryTable.TITLE + " TEXT,"
-                + MetaData.EntryTable.CONTENT + " TEXT,"
-                + MetaData.EntryTable.DATE + " LONG"
-                + ");");
+        db.execSQL(MetaData.SQL_CREATE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-        db.execSQL("DROP TABLE IF EXISTS " + MetaData.EntryTable.TABLE_NAME);
+        db.execSQL(MetaData.SQL_DROP_TABLE);
         onCreate(db);
     }
 }

@@ -20,17 +20,24 @@ public class MetaData
     public static final String CONTENT_TYPE_ENTRY = "vnd.android.cursor.item/com.pieter_jan.provider.entries";
     public static final String DEFAULT_SORT_ORDER = "_id DESC";
 
+    public static final String SQL_CREATE_TABLE =
+            "CREATE TABLE "
+            + EntryTable.TABLE_NAME + " ("
+            + EntryTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + EntryTable.TITLE + " TEXT,"
+            + EntryTable.CONTENT + " TEXT,"
+            + EntryTable.DATE + " LONG"
+            + ");";
 
+    public static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + EntryTable.TABLE_NAME;
 
-    public class EntryTable implements BaseColumns
+    public static class EntryTable implements BaseColumns
     {
-        private EntryTable() { }
-
         public static final String TABLE_NAME = "entries";
-
         public static final String _ID = "_id";
         public static final String TITLE = "title";
         public static final String CONTENT = "content";
         public static final String DATE = "date";
+        public static final String[] ALL_COLUMNS = { _ID, TITLE, CONTENT, DATE };
     }
 }

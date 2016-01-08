@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -20,7 +19,8 @@ public class DiaryContentProvider extends ContentProvider
 {
     private static final int ENTRIES = 1;
     private static final int ENTRY_ID = 2;
-    private static HashMap<String, String> sNotesProjectionMap;
+    private static HashMap<String, String> sEntriesProjectionMap;
+    private MyDB mDatabase;
 
     private static final UriMatcher sUriMatcher;
     static {
@@ -28,18 +28,17 @@ public class DiaryContentProvider extends ContentProvider
         sUriMatcher.addURI(MetaData.AUTHORITY, "entry", ENTRIES);
         sUriMatcher.addURI(MetaData.AUTHORITY, "entry/#", ENTRY_ID);
 
-        sNotesProjectionMap = new HashMap<>();
-        sNotesProjectionMap.put(MetaData.EntryTable._ID, MetaData.EntryTable._ID);
-        sNotesProjectionMap.put(MetaData.EntryTable.TITLE, MetaData.EntryTable.TITLE);
-        sNotesProjectionMap.put(MetaData.EntryTable.CONTENT, MetaData.EntryTable.CONTENT);
-        sNotesProjectionMap.put(MetaData.EntryTable.DATE, MetaData.EntryTable.DATE);
+        sEntriesProjectionMap = new HashMap<>();
+        sEntriesProjectionMap.put(MetaData.EntryTable._ID, MetaData.EntryTable._ID);
+        sEntriesProjectionMap.put(MetaData.EntryTable.TITLE, MetaData.EntryTable.TITLE);
+        sEntriesProjectionMap.put(MetaData.EntryTable.CONTENT, MetaData.EntryTable.CONTENT);
+        sEntriesProjectionMap.put(MetaData.EntryTable.DATE, MetaData.EntryTable.DATE);
     }
-
-    private MyDBHelper helper;
 
     @Override
     public boolean onCreate() {
-        helper = new MyDBHelper(getContext());
+        mDatabase = new MyDB(getContext().getApplicationContext());
+        mDatabase.open();
         return true;
     }
 
@@ -50,14 +49,12 @@ public class DiaryContentProvider extends ContentProvider
 
         switch (sUriMatcher.match(uri)) {
             case ENTRIES:
-                qb.setProjectionMap(sNotesProjectionMap);
+                qb.setProjectionMap(sEntriesProjectionMap);
                 break;
-
             case ENTRY_ID:
-                qb.setProjectionMap(sNotesProjectionMap);
+                qb.setProjectionMap(sEntriesProjectionMap);
                 qb.appendWhere(MetaData.EntryTable._ID + "=" + uri.getPathSegments().get(1));
                 break;
-
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -70,9 +67,7 @@ public class DiaryContentProvider extends ContentProvider
             orderBy = sortOrder;
         }
 
-        // Get the database and run the query
-        SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, orderBy);
+        Cursor c = mDatabase.getDiaryEntries(qb, projection, selection, selectionArgs, null, null, orderBy);
 
         // Tell the cursor what uri to watch, so it knows when its source data changes
         c.setNotificationUri(getContext().getContentResolver(), uri);
@@ -118,9 +113,7 @@ public class DiaryContentProvider extends ContentProvider
             values.put(MetaData.EntryTable.DATE, "TODO");
         }
 
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-        long rowId = db.insert(MetaData.EntryTable.TABLE_NAME, MetaData.EntryTable.CONTENT, values);
+        long rowId = mDatabase.insert(MetaData.EntryTable.TABLE_NAME, MetaData.EntryTable.CONTENT, values);
         if (rowId > 0) {
             Uri entryUri = ContentUris.withAppendedId(MetaData.CONTENT_URI, rowId);
             getContext().getContentResolver().notifyChange(entryUri, null);
@@ -132,16 +125,15 @@ public class DiaryContentProvider extends ContentProvider
 
     @Override
     public int delete(Uri uri, String where, String[] whereArgs) {
-        SQLiteDatabase db = helper.getWritableDatabase();
         int count;
         switch (sUriMatcher.match(uri)) {
             case ENTRIES:
-                count = db.delete(MetaData.EntryTable.TABLE_NAME, where, whereArgs);
+                count = mDatabase.delete(MetaData.EntryTable.TABLE_NAME, where, whereArgs);
                 break;
 
             case ENTRY_ID:
                 String entryId = uri.getPathSegments().get(1);
-                count = db.delete(MetaData.EntryTable.TABLE_NAME, MetaData.EntryTable._ID + "=" + entryId
+                count = mDatabase.delete(MetaData.EntryTable.TABLE_NAME, MetaData.EntryTable._ID + "=" + entryId
                         + (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""), whereArgs);
                 break;
 
@@ -155,16 +147,15 @@ public class DiaryContentProvider extends ContentProvider
 
     @Override
     public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
-        SQLiteDatabase db = helper.getWritableDatabase();
         int count;
         switch (sUriMatcher.match(uri)) {
             case ENTRIES:
-                count = db.update(MetaData.EntryTable.TABLE_NAME, values, where, whereArgs);
+                count = mDatabase.update(MetaData.EntryTable.TABLE_NAME, values, where, whereArgs);
                 break;
 
             case ENTRY_ID:
                 String entryId = uri.getPathSegments().get(1);
-                count = db.update(MetaData.EntryTable.TABLE_NAME, values, MetaData.EntryTable._ID + "=" + entryId
+                count = mDatabase.update(MetaData.EntryTable.TABLE_NAME, values, MetaData.EntryTable._ID + "=" + entryId
                         + (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""), whereArgs);
                 break;
 
