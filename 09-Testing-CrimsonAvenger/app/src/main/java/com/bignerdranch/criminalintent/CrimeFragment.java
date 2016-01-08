@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bignerdranch.android.criminalintent.R;
 import com.bignerdranch.criminalintent.model.Crime;
@@ -226,15 +227,35 @@ public class CrimeFragment extends Fragment {
     @OnClick(R.id.crime_report)
     public void reportCrime()
     {
+        String crimeReport = getCrimeReport();
+        String photo = mCrime.getPhoto();
+        if (crimeReport == null)
+        {
+            Toast.makeText(getActivity(), getResources().getString(R.string.need_title),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (photo == null)
+        {
+            Toast.makeText(getActivity(), getResources().getString(R.string.need_picture),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        File picture = new File(photo);
+        if (!picture.exists() || !picture.canRead())
+        {
+            Toast.makeText(getActivity(), getResources().getString(R.string.need_picture),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("text/plain");
         i.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
-        i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+        i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject) + " " +
+                DateFormat.getDateFormat(getActivity()).format(mCrime.getDate()));
         if (mCrime.getSuspectMail() != null)
             i.putExtra(Intent.EXTRA_EMAIL, new String[] { mCrime.getSuspectMail() });
-        File picture = new File(mCrime.getPhoto());
-        if (picture.exists() && picture.canRead())
-            i.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(picture));
+        i.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(picture));
         i = Intent.createChooser(i, getString(R.string.send_report));
         startActivity(i);
     }
@@ -255,7 +276,7 @@ public class CrimeFragment extends Fragment {
     }
 
     private String getCrimeReport() {
-        String solvedString = null;
+        String solvedString;
         if (mCrime.getSolved()) {
             solvedString = getString(R.string.crime_report_solved);
         } else {
@@ -269,9 +290,10 @@ public class CrimeFragment extends Fragment {
         } else {
             suspect = getString(R.string.crime_report_suspect, suspect);
         }
-        String report = getString(R.string.crime_report,
+        if (mCrime.getTitle() == null || mCrime.getTitle().trim().equals(""))
+            return null;
+        return getString(R.string.crime_report,
                 mCrime.getTitle(), dateString, solvedString, suspect);
-        return report;
     }
 
     @Override

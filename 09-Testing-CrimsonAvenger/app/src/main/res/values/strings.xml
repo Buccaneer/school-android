@@ -21,7 +21,9 @@
     <string name="crime_report_unsolved">The case is not solved</string>
     <string name="crime_report_no_suspect">there is no suspect.</string>
     <string name="crime_report_suspect">the suspect is %s.</string>
-    <string name="crime_report_subject">CriminalIntent Crime Report</string>
+    <string name="crime_report_subject">Crime Report</string>
     <string name="send_report">Send crime report via</string>
     <string name="take">Take!</string>
+    <string name="need_title">You need to name the crime before filing a report.</string>
+    <string name="need_picture">You need to take a picture as proof before filing a report.</string>
 </resources>

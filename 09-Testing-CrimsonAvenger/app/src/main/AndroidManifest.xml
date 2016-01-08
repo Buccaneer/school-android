@@ -21,8 +21,7 @@
             android:label="@string/app_name"
             android:parentActivityName="com.bignerdranch.criminalintent.CrimeListActivity">
         </activity>
-        <activity android:name="com.bignerdranch.criminalintent.CrimeListActivity"
-                  android:configChanges="orientation|screenSize">
+        <activity android:name="com.bignerdranch.criminalintent.CrimeListActivity">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
