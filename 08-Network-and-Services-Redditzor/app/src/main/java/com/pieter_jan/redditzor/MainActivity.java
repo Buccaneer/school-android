@@ -24,6 +24,7 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.pieter_jan.redditzor.model.DaoHelper;
 import com.pieter_jan.redditzor.model.DaoMaster;
 import com.pieter_jan.redditzor.model.DaoSession;
 import com.pieter_jan.redditzor.model.Listing;
@@ -48,8 +49,8 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
     private int subreddit;
 
     private SQLiteDatabase db;
-    private ListingDao listingDao;
-    private PostDao postDao;
+    private static ListingDao listingDao;
+    private static PostDao postDao;
 
     private SubRedditFragment subredditFragment;
 
@@ -67,12 +68,16 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
 
     private void initDb()
     {
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "reddit-db", null);
+        /*DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(getApplicationContext(), "reddit-db", null);
         db = helper.getWritableDatabase();
         DaoMaster daoMaster = new DaoMaster(db);
         DaoSession daoSession = daoMaster.newSession();
         listingDao = daoSession.getListingDao();
+        postDao = daoSession.getPostDao();*/
+        DaoSession daoSession = DaoHelper.getSession(getApplicationContext());
+        listingDao = daoSession.getListingDao();
         postDao = daoSession.getPostDao();
+
     }
 
     private void initPreferences()
@@ -138,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements SubRedditFragment
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .add(R.id.content, subredditFragment)
+                .replace(R.id.content, subredditFragment)
                 .commit();
 
         // Highlight the selected item, update the title, and close the drawer
