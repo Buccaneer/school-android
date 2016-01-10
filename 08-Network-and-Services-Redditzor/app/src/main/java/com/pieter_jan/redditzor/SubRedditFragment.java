@@ -1,5 +1,6 @@
 package com.pieter_jan.redditzor;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,6 +34,7 @@ import retrofit.Retrofit;
  */
 public class SubRedditFragment extends Fragment implements PostAdapter.PostSelectedListener, Callback<Listing>
 {
+    public static final String SUBREDDIT = "subreddit";
     public static final String SUBREDDIT_NUMBER = "subreddit_number";
     public static final String LOAD_LIMIT = "load_limit";
 
@@ -48,7 +50,11 @@ public class SubRedditFragment extends Fragment implements PostAdapter.PostSelec
     private PostAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
 
+    private ListingDao listingDao;
+    private PostDao postDao;
+
     private Listing expandingListing;
+    private int subredditIndex = 0;
     private String subreddit;
 
     private Coordinator coordinator;
@@ -56,29 +62,50 @@ public class SubRedditFragment extends Fragment implements PostAdapter.PostSelec
     public interface Coordinator
     {
         int getLoadLimit();
-        void persist(Listing listing);
-        Listing getListing(String subreddit);
+
         void goToPost(Post post);
     }
 
-    public Listing getListing()
+    @Override
+    public void onAttach(Context context)
     {
-        return expandingListing;
+        super.onAttach(context);
+        try
+        {
+            coordinator = (Coordinator) context;
+        }
+        catch (ClassCastException e)
+        {
+            throw new ClassCastException(context.toString() + " must implement Coordinator");
+        }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        coordinator = (Coordinator) getActivity();
-        int index = getArguments().getInt(SUBREDDIT_NUMBER);
-        initListing(index);
+        DaoSession session = DaoHelper.getSession(getActivity().getApplicationContext());
+        listingDao = session.getListingDao();
+        postDao = session.getPostDao();
+        subredditIndex = getArguments().getInt(SUBREDDIT_NUMBER);
+        if (savedInstanceState != null)
+        {
+            subredditIndex = savedInstanceState.getInt(SUBREDDIT_NUMBER);
+        }
+        initListing(subredditIndex);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        savedInstanceState.putInt(SUBREDDIT_NUMBER, subredditIndex);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     private void initListing(int index)
     {
         subreddit = getResources().getStringArray(R.array.subreddits_array)[index];
-        expandingListing = coordinator.getListing(subreddit);
+        expandingListing = listingDao.queryBuilder().where(ListingDao.Properties.Category.eq(subreddit)).unique();
         if (expandingListing == null)
             expandingListing = new Listing(new ArrayList<Post>(), subreddit);
     }
@@ -88,23 +115,31 @@ public class SubRedditFragment extends Fragment implements PostAdapter.PostSelec
     {
         View rootView = inflater.inflate(R.layout.post_list, container, false);
         ButterKnife.bind(this, rootView);
-
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLayoutManager);
         if (expandingListing.getPosts().size() == 0)
             loadData();
 
         initAdapter(expandingListing, mRecyclerView);
+
         return rootView;
     }
 
     private void initAdapter(final Listing listing, RecyclerView recyclerView)
     {
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new PostAdapter(getActivity(), listing.getPosts());
-        mAdapter.setListener(this);
+        if (mAdapter == null)
+        {
+            mAdapter = new PostAdapter(getActivity(), listing.getPosts());
+            mAdapter.setListener(this);
+        }
+        else
+        {
+            mAdapter.mPosts = listing.getPosts();
+            mAdapter.notifyDataSetChanged();
+        }
         recyclerView.setAdapter(mAdapter);
-        recyclerView.setOnScrollListener(new EndlessRecyclerOnScrollListener(mLayoutManager)
+        recyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener(mLayoutManager)
         {
             @Override
             public void onLoadMore(int current_page)
@@ -177,7 +212,8 @@ public class SubRedditFragment extends Fragment implements PostAdapter.PostSelec
 
     public void goToSubreddit(int index)
     {
-        initListing(index);
+        subredditIndex = index;
+        initListing(subredditIndex);
         initAdapter(expandingListing, mRecyclerView);
         if (expandingListing.getPosts().size() == 0)
             loadData();
@@ -195,7 +231,12 @@ public class SubRedditFragment extends Fragment implements PostAdapter.PostSelec
         Listing newListing = response.body();
         expandingListing.getPosts().addAll(response.body().getPosts());
         expandingListing.setAfter(newListing.getAfter());
-        coordinator.persist(expandingListing);
+        for (Post p : expandingListing.getPosts())
+        {
+            p.setListingId(expandingListing.getId());
+            postDao.insertOrReplace(p);
+        }
+        listingDao.insertOrReplace(expandingListing);
         Log.e(subreddit, coordinator.getLoadLimit() + " posts have been loaded.");
         mAdapter.notifyDataSetChanged();
         spinnerContainer.setVisibility(View.GONE);
