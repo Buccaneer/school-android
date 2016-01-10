@@ -7,4 +7,6 @@
     <string name="dial">Dial</string>
     <string name="google">Google</string>
     <string name="voice_command">Voice command</string>
+    <string name="is_invalid">is an invalid URL.</string>
+    <string name="no_suitable_app">Couldn\'t find a suitable app to open this URL.</string>
 </resources>

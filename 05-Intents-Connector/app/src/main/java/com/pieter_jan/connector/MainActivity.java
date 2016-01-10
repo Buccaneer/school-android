@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Patterns;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -71,28 +72,33 @@ public class MainActivity extends AppCompatActivity
 
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
-        //input.setText("http://");
         builder.setView(input);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
         {
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
-                String url = input.getText().toString();
-                if (!url.startsWith("http"))
+                String base = input.getText().toString();
+                String url = "-1";
+                if (!base.startsWith("http"))
                 {
-                    url = "http://".concat(url);
+                    url = "http://".concat(base);
+                }
+                if (!Patterns.WEB_URL.matcher(url).matches())
+                {
+                    Toast.makeText(getApplicationContext(), "\"" + base + "\" " + getResources().getString(R.string.is_invalid), Toast.LENGTH_SHORT).show();
+                    return;
                 }
                 uri = Uri.parse(url);
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(uri);
-                try
+                if (intent.resolveActivity(getPackageManager()) != null)
                 {
                     startActivity(intent);
                 }
-                catch (ActivityNotFoundException e)
+                else
                 {
-                    Toast.makeText(getApplicationContext(), "Invalid url", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_suitable_app), Toast.LENGTH_SHORT).show();
                 }
             }
         });
