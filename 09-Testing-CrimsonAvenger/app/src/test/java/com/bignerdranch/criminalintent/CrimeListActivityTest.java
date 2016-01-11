@@ -2,6 +2,7 @@ package com.bignerdranch.criminalintent;
 
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 
 import com.bignerdranch.android.criminalintent.BuildConfig;
 import com.bignerdranch.android.criminalintent.R;
@@ -17,6 +18,7 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 import org.robolectric.shadows.ShadowIntent;
+import org.robolectric.util.ActivityController;
 
 import java.lang.reflect.Field;
 
@@ -31,14 +33,14 @@ import static junit.framework.Assert.assertTrue;
 @RunWith(RobolectricGradleTestRunner.class)
 public class CrimeListActivityTest
 {
+    private ActivityController<CrimeListActivity> controller;
     private CrimeListActivity activity;
 
     @Before
     public void setup()
     {
-        // Convenience method to run Activity through the Activity Lifecycle methods:
-        // onCreate(...) => onStart() => onPostCreate(...) => onResume()
-        activity = Robolectric.setupActivity(CrimeListActivity.class);
+        controller = Robolectric.buildActivity(CrimeListActivity.class);
+        activity = controller.attach().create().visible().start().resume().get();
     }
 
     @After
@@ -58,7 +60,7 @@ public class CrimeListActivityTest
         }
     }
 
-    @Test
+    @Test /**MENU ITEM*/
     public void validateSubtitleMenuItem()
     {
         // No subtitle default
@@ -74,7 +76,7 @@ public class CrimeListActivityTest
         assertNull(activity.getSupportActionBar().getSubtitle());
     }
 
-    @Test
+    @Test /**MENU ITEM*/
     public void validateAddEntryMenuItem()
     {
         ShadowActivity shadowActivity = Shadows.shadowOf(activity);
@@ -86,7 +88,7 @@ public class CrimeListActivityTest
         assertEquals(shadowIntent.getComponent().getClassName(), CrimePagerActivity.class.getName());
     }
 
-    @Test
+    @Test /**INTENT*/
     public void validateSelectCrimeFromList()
     {
         ShadowActivity shadowActivity = Shadows.shadowOf(activity);
@@ -102,6 +104,37 @@ public class CrimeListActivityTest
         ShadowIntent shadowIntent = Shadows.shadowOf(startedIntent);
 
         assertEquals(shadowIntent.getComponent().getClassName(), CrimePagerActivity.class.getName());
+    }
+
+    @Test /**ROTATION*/
+    public void recreatesActivity() {
+        Bundle bundle = new Bundle();
+
+        // No subtitle default
+        assertNull(activity.getSupportActionBar().getSubtitle());
+
+        // Subtitle after click on SHOW SUBTITLE
+        ShadowActivity shadowActivity = Shadows.shadowOf(activity);
+        shadowActivity.clickMenuItem(R.id.menu_item_show_subtitle);
+
+        // Destroy the original activity
+        controller
+                .saveInstanceState(bundle)
+                .pause()
+                .stop()
+                .destroy();
+
+        // Bring up a new activity
+        controller = Robolectric.buildActivity(CrimeListActivity.class)
+                .create(bundle)
+                .start()
+                .restoreInstanceState(bundle)
+                .resume()
+                .visible();
+        activity = controller.get();
+
+        // Check is subtitle is still visible after rotation
+        assertTrue(activity.getSupportActionBar().getSubtitle().toString().matches(".*crimes"));
     }
 
 }
