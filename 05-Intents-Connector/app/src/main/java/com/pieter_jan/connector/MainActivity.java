@@ -1,6 +1,7 @@
 package com.pieter_jan.connector;
 
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -38,9 +39,15 @@ public class MainActivity extends AppCompatActivity
     @OnClick(R.id.contacts)
     public void goToContacts()
     {
-        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-        int requestCode = 1;
-        startActivityForResult(intent, requestCode);
+        Intent i = new Intent();
+        i.setComponent(new ComponentName("com.android.contacts", "com.android.contacts.DialtactsContactsEntryActivity"));
+        i.setAction("android.intent.action.MAIN");
+        i.addCategory("android.intent.category.LAUNCHER");
+        i.addCategory("android.intent.category.DEFAULT");
+        startActivity(i);
+        //Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        //int requestCode = 1;
+        //startActivityForResult(intent, requestCode);
     }
 
     @OnClick(R.id.dial)
@@ -61,7 +68,8 @@ public class MainActivity extends AppCompatActivity
     public void goToVoiceCommand()
     {
         final int RECOGNIZER_REQ_CODE = 1234;
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        //Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        Intent intent = new Intent("android.intent.action.VOICE_ASSIST");
         startActivityForResult(intent, RECOGNIZER_REQ_CODE);
     }
 
