@@ -20,7 +20,6 @@ public class PlayActivity extends AppCompatActivity
 {
     private Board board;
     private SharedPreferences mPrefs;
-    private boolean newGame;
     private boolean alreadyWon = false;
 
     public static String SCORE = "SCORE";
@@ -35,14 +34,25 @@ public class PlayActivity extends AppCompatActivity
     TextView scoreTextView;
 
     @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        savedInstanceState.putBoolean(ALREADYWON, alreadyWon);
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         ButterKnife.bind(this);
+        mPrefs = getSharedPreferences("board", MODE_PRIVATE);
         Intent intent = getIntent();
-        newGame = intent.getBooleanExtra(NEWGAME, false);
-        alreadyWon = intent.getBooleanExtra(ALREADYWON, false);
+        boolean newGame = intent.getBooleanExtra(NEWGAME, false);
+        if (savedInstanceState != null)
+            alreadyWon = savedInstanceState.getBoolean(ALREADYWON);
+        else
+            alreadyWon = newGame ? false : mPrefs.getBoolean(ALREADYWON, false);
         intent.removeExtra(NEWGAME);
         setupActionBar();
         initBoard(newGame);
@@ -70,7 +80,6 @@ public class PlayActivity extends AppCompatActivity
 
     private void initBoard(boolean startNewGame)
     {
-        mPrefs = getSharedPreferences("board", MODE_PRIVATE);
         String json = startNewGame ? null : mPrefs.getString(BOARD, null);
         int score = startNewGame ? 0 : mPrefs.getInt(SCORE, 0);
         board = new Board(this, json, score);
@@ -114,6 +123,7 @@ public class PlayActivity extends AppCompatActivity
         }
         else if (!alreadyWon && board.wonGame())
         {
+            alreadyWon = true;
             winGame();
         }
         updateScore();
@@ -183,6 +193,7 @@ public class PlayActivity extends AppCompatActivity
                 {
                     public void onClick(DialogInterface dialog, int which)
                     {
+                        alreadyWon = false;
                         board.resetBoard();
                         updateScore();
                     }
@@ -238,6 +249,8 @@ public class PlayActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings)
         {
+            board.cheat();
+            updateScore();
             return true;
         }
 

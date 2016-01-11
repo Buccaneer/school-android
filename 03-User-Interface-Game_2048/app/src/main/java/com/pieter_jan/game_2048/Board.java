@@ -98,6 +98,18 @@ public class Board extends GridLayout
         addRandom();
     }
 
+    public void cheat()
+    {
+        score += 99999;
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                cardBoard[i][j].setNumber(1024);
+            }
+        }
+    }
+
     private void addRandom()
     {
         ArrayList<int[]> list = new ArrayList<>();
