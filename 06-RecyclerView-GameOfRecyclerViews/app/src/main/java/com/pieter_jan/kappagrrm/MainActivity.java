@@ -15,7 +15,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MainAdapter.CharacterSelectedListener
 {
-    public static String EVERYONEDIED = "EVERYONEDIED";
+    public static final String EVERYONEDIED = "EVERYONEDIED";
+    private static final String listFragmentTag = "characterListFragment";
+    private static final String detailFragmentTag = "characterDetailsFragment";
     private boolean everyoneDied;
 
     FragmentManager fragmentManager;
@@ -31,7 +33,10 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.Chara
         mPrefs = getSharedPreferences("grrm", Context.MODE_PRIVATE);
         everyoneDied = mPrefs.getBoolean(EVERYONEDIED, false);
         fragmentManager = getSupportFragmentManager();
-        startFragment();
+        if (fragmentManager.findFragmentByTag(listFragmentTag) == null)
+            startFragment();
+        if(fragmentManager.findFragmentByTag(detailFragmentTag) != null)
+            enableUpNavigation(true);
     }
 
     private void startFragment()
@@ -45,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.Chara
         else
         {
             FragmentTransaction transaction = fragmentManager.beginTransaction();
-            transaction.add(R.id.container, new CharacterListFragment(), "characterListFragment");
+            transaction.add(R.id.container, new CharacterListFragment(), listFragmentTag);
             transaction.commit();
         }
     }
@@ -58,22 +63,25 @@ public class MainActivity extends AppCompatActivity implements MainAdapter.Chara
         args.putParcelable(CharacterDetailsFragment.PARCEL, character);
         CharacterDetailsFragment fragment = new CharacterDetailsFragment();
         fragment.setArguments(args);
-        transaction.replace(R.id.container, fragment, "characterDetailsFragment");
+        transaction.replace(R.id.container, fragment, detailFragmentTag);
         transaction.addToBackStack(null);
         transaction.commit();
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        enableUpNavigation(true);
     }
 
     @Override
     public boolean onSupportNavigateUp()
     {
         fragmentManager.popBackStack();
+        enableUpNavigation(false);
+        return true;
+    }
+
+    private void enableUpNavigation(boolean enable)
+    {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(false);
-        return true;
+            actionBar.setDisplayHomeAsUpEnabled(enable);
     }
 
     public List<Character> getCharacters()
