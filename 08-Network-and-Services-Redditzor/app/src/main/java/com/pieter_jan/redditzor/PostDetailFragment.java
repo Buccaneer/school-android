@@ -14,6 +14,10 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.pieter_jan.redditzor.model.Post;
 
+import org.markdown4j.Markdown4jProcessor;
+
+import java.io.IOException;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -54,7 +58,7 @@ public class PostDetailFragment extends Fragment
     {
         mTitleTextView.setText(hyperlink(post.getTitle(), post.getUrl()));
         mTitleTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        if (post.getText() != null) mDescriptionTextView.setText(post.getText());
+        if (post.getText() != null) mDescriptionTextView.setText(Html.fromHtml(formatText(post.getText())));
         if (post.getImage() != null)
             Glide.with(mImageView.getContext())
                 .load(post.getImage())
@@ -64,6 +68,19 @@ public class PostDetailFragment extends Fragment
     private Spanned hyperlink(String text, String url)
     {
         return Html.fromHtml("<a href='" + url + "'>" + text + "</a>");
+    }
+
+    private String formatText(String selftext)
+    {
+        try
+        {
+            return new Markdown4jProcessor().process(selftext);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return selftext;
     }
 
 }
