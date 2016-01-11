@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -238,6 +239,10 @@ public class SubRedditFragment extends Fragment implements PostAdapter.PostSelec
         }
         listingDao.insertOrReplace(expandingListing);
         Log.e(subreddit, coordinator.getLoadLimit() + " posts have been loaded.");
+        Toast.makeText(getActivity(),
+                getResources().getString(R.string.loaded_posts, coordinator.getLoadLimit()),
+                Toast.LENGTH_SHORT)
+                .show();
         mAdapter.notifyDataSetChanged();
         spinnerContainer.setVisibility(View.GONE);
     }
