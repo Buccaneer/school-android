@@ -44,7 +44,11 @@ public class MainActivity extends AppCompatActivity
         i.setAction("android.intent.action.MAIN");
         i.addCategory("android.intent.category.LAUNCHER");
         i.addCategory("android.intent.category.DEFAULT");
-        startActivity(i);
+		if (i.resolveActivity(getPackageManager()) != null)
+            startActivity(intent);
+        else {
+            Toast.makeText(MainActivity.this, R.string.no_suitable_app, Toast.LENGTH_SHORT).show();
+        }
         //Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
         //int requestCode = 1;
         //startActivityForResult(intent, requestCode);
@@ -54,14 +58,22 @@ public class MainActivity extends AppCompatActivity
     public void dial()
     {
         Intent intent = new Intent(Intent.ACTION_DIAL);
-        startActivity(intent);
+        if (intent.resolveActivity(getPackageManager()) != null)
+            startActivity(intent);
+        else {
+            Toast.makeText(MainActivity.this, R.string.no_suitable_app, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.google)
     public void google()
     {
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-        startActivity(intent);
+        if (intent.resolveActivity(getPackageManager()) != null)
+            startActivity(intent);
+        else {
+            Toast.makeText(MainActivity.this, R.string.no_suitable_app, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.voice_command)
@@ -70,7 +82,11 @@ public class MainActivity extends AppCompatActivity
         final int RECOGNIZER_REQ_CODE = 1234;
         //Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         Intent intent = new Intent("android.intent.action.VOICE_ASSIST");
-        startActivityForResult(intent, RECOGNIZER_REQ_CODE);
+		if (intent.resolveActivity(getPackageManager()) != null)
+            startActivityForResult(intent, RECOGNIZER_REQ_CODE);
+        else {
+            Toast.makeText(MainActivity.this, R.string.no_suitable_app, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void askForUrl()
